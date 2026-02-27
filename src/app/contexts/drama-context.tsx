@@ -18,10 +18,17 @@ export const DramaProvider = ({ children, baseUrl, endpoint, apiKey, modelName }
     const [drama, setDrama] = useState<Drama | undefined>();
 
     useEffect(() => {
-        process.env.DE_ENDPOINT_URL = endpoint
+        // Removed process.env.DE_ENDPOINT_URL = endpoint assignment as it's not a best practice
+        // and doesn't affect the client-side environment safely.
+        // If the library relies on it, it should be passed via configuration options if possible.
+        // Assuming the httpClient override handles the necessary routing.
 
         const httpClient = (url: string, requestData: any, headers: Headers) => {
-            return fetch(url, {
+            const targetUrl = endpoint ? endpoint : url; // Use the provided endpoint prop if available
+
+            console.log(`[DramaProvider] Sending request to ${targetUrl} (Base: ${baseUrl})`);
+
+            return fetch(targetUrl, {
                 method: "POST",
                 body: JSON.stringify(requestData),
                 headers: { ...headers, "DE_BASE_URL": baseUrl, "DE_BACKEND_API_KEY": apiKey },
@@ -29,14 +36,24 @@ export const DramaProvider = ({ children, baseUrl, endpoint, apiKey, modelName }
         }
 
         const initialiseDrama = async () => {
-            const d = await Drama.initialize("co-working", testCompanionConfigs, undefined, {
-                defaultModel: { model: modelName, max_tokens: 200 }, summaryModel: undefined, chatModeOverride: undefined, httpClient
-            });
-            setDrama(d);
+            try {
+                const d = await Drama.initialize("co-working", testCompanionConfigs, undefined, {
+                    defaultModel: { model: modelName, max_tokens: 200 },
+                    summaryModel: undefined,
+                    chatModeOverride: undefined,
+                    httpClient
+                });
+                setDrama(d);
 
-            d.addChat("water-cooler", "water-cooler", [...d.companions.filter(c => c.configuration.kind == "npc").map(c => c.id), "you"], 8, "auto");
+                d.addChat("water-cooler", "water-cooler", [...d.companions.filter(c => c.configuration.kind == "npc").map(c => c.id), "you"], 8, "auto");
+            } catch (e) {
+                console.error("Failed to initialize Drama Engine:", e);
+            }
         }
-        !drama && initialiseDrama();
+
+        if (!drama) {
+            initialiseDrama();
+        }
     }, [apiKey, baseUrl, drama, endpoint, modelName])
 
     return (
