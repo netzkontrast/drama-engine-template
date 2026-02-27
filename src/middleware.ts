@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 const SERVER_MANAGED_KEY = "SERVER_MANAGED";
+const OPENROUTER_BASE_URL = "https://openrouter.ai/api";
 
 async function sendFetch(req: NextRequest) {
   // A default error response
@@ -10,13 +11,10 @@ async function sendFetch(req: NextRequest) {
   const origHeaders = req.headers;
 
   let apiKey = origHeaders.get("DE_BACKEND_API_KEY") || "";
-  let baseUrl = origHeaders.get("DE_BASE_URL") || "";
 
   // SECURITY: If server-side configuration is present, we MUST prioritize it
-  // and ignore client-provided headers to prevent SSRF and API key leakage.
-
-  const serverApiKey = process.env.DE_BACKEND_API_KEY || process.env.NEXT_PUBLIC_DE_BACKEND_API_KEY;
-  const serverBaseUrl = process.env.DE_BASE_URL || process.env.NEXT_PUBLIC_DE_BASE_URL;
+  // and ignore client-provided headers to prevent API key leakage.
+  const serverApiKey = process.env.DE_BACKEND_API_KEY;
 
   // If server-side API Key is set, we use it.
   // We strictly ignore the client header if the server key is configured,
@@ -25,23 +23,14 @@ async function sendFetch(req: NextRequest) {
     apiKey = serverApiKey || "";
   }
 
-  // If server-side Base URL is set, we MUST use it and ignore the client header.
-  // This prevents a malicious client from redirecting the request (with the secret key) to their own server.
-  if (serverBaseUrl) {
-    baseUrl = serverBaseUrl;
-  }
-
   // Trim to avoid accidental whitespace issues
   apiKey = apiKey.trim();
-  baseUrl = baseUrl.trim();
 
-  // Remove trailing slash from base URL to avoid double slashes when joining paths
-  if (baseUrl.endsWith('/')) {
-      baseUrl = baseUrl.slice(0, -1);
-  }
+  // Hardcoded Base URL for OpenRouter
+  const baseUrl = OPENROUTER_BASE_URL;
 
-  if (!apiKey || !baseUrl) {
-    console.error("Missing API Key or Base URL configuration.");
+  if (!apiKey) {
+    console.error("Missing API Key configuration.");
     return NextResponse.json({ error: 'Missing configuration.' }, { status: 500 });
   }
 
