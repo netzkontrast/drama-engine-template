@@ -8,26 +8,42 @@ This project is a Next.js template for building chat applications using the [Dra
 
 ### Frontend (`src/app`)
 
-*   **Entry Point**: `src/app/page.tsx` handles the initial configuration (API Key, Base URL, etc.). It renders the `AllChatsContainer` wrapped in `DramaProvider` once configured.
-*   **Context**: `src/app/contexts/drama-context.tsx` initializes the `Drama` instance from `@write-with-laika/drama-engine`. It manages the connection to the LLM provider.
-*   **Components**: located in `src/app/components/`, these handle the chat UI (`AllChatsContainer`, `ChatTabsContainer`, `ChatHistoryContainer`).
+*   **Entry Point**: `src/app/page.tsx` (Server Component) determines the initial configuration. It checks for environment variables and passes them to `src/app/components/HomeClient.tsx` (Client Component).
+*   **State Management**: `src/app/contexts/drama-context.tsx` initializes the `Drama` instance and manages the connection.
+*   **Components**: Located in `src/app/components/`, these handle the chat UI.
 
 ### Middleware (`src/middleware.ts`)
 
 The middleware acts as a proxy for requests to `/v1/completions` and `/v1/chat/completions`.
-It intercepts requests from the frontend and forwards them to the configured LLM provider (e.g., OpenRouter, Together AI).
-**Important**: The middleware is intended to hide API keys from the client, but currently, the client sends them in headers. A more secure approach would be to store keys server-side.
+It intercepts requests from the frontend and forwards them to the configured LLM provider.
+It handles authorization by injecting the API key, either from the request headers (client-side config) or from server-side environment variables (server-side config).
 
 ## Configuration
 
-The application can be configured via environment variables or the UI form on the landing page.
+The application can be configured in two ways, with **Server-Side Configuration** being the preferred and more secure method.
 
-### Environment Variables
+### 1. Server-Side Configuration (Recommended)
 
-*   `NEXT_PUBLIC_DE_BASE_URL`: The base URL of the LLM provider (e.g., `https://openrouter.ai/api`).
-*   `NEXT_PUBLIC_DE_ENDPOINT_URL`: The specific endpoint (e.g., `/v1/completions`).
-*   `NEXT_PUBLIC_DE_BACKEND_API_KEY`: Your API Key for the LLM provider.
-*   `NEXT_PUBLIC_DE_MODEL_NAME`: The model to use (e.g., `stepfun/step-3.5-flash:free`).
+Set these environment variables in your `.env` file or deployment platform (e.g., Vercel). These are **not** exposed to the browser.
+
+*   `DE_BASE_URL`: The base URL of the LLM provider (e.g., `https://openrouter.ai/api`).
+*   `DE_BACKEND_API_KEY`: Your API Key for the LLM provider.
+*   `DE_ENDPOINT_URL`: The specific endpoint (optional, defaults to `/v1/completions`).
+
+When configured this way, the client receives a placeholder key (`SERVER_MANAGED`), and the actual key is injected by the middleware.
+
+### 2. Client-Side Configuration (Optional)
+
+You can also use `NEXT_PUBLIC_` prefixed variables. These **are** exposed to the browser. Use this only if server-side configuration is not possible.
+
+*   `NEXT_PUBLIC_DE_BASE_URL`
+*   `NEXT_PUBLIC_DE_BACKEND_API_KEY`
+*   `NEXT_PUBLIC_DE_ENDPOINT_URL`
+*   `NEXT_PUBLIC_DE_MODEL_NAME` (To set the default model)
+
+### 3. Manual Configuration
+
+If no environment variables are set, the user will be prompted with a configuration form on the landing page.
 
 ## Development
 
@@ -37,6 +53,6 @@ The application can be configured via environment variables or the UI form on th
 
 ## Conventions
 
-*   **State Management**: Use React Context (`DramaContext`) for global state related to the drama engine.
-*   **Styling**: Tailwind CSS is used for styling.
-*   **Client vs Server**: Be mindful of Next.js Server vs Client Components. The `Drama` engine runs on the client, so components interacting with it must be marked `"use client"`.
+*   **State Management**: Use React Context (`DramaContext`) for global state.
+*   **Styling**: Tailwind CSS.
+*   **Security**: Always prefer server-side environment variables for sensitive keys (`DE_BACKEND_API_KEY`).
