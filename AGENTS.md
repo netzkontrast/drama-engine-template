@@ -28,7 +28,7 @@ Set these environment variables in your `.env` file or deployment platform (e.g.
 
 *   `DE_BASE_URL`: The base URL of the LLM provider (e.g., `https://openrouter.ai/api`).
 *   `DE_BACKEND_API_KEY`: Your API Key for the LLM provider.
-*   `DE_ENDPOINT_URL`: The specific endpoint (optional, defaults to `/v1/completions`).
+*   `DE_ENDPOINT_URL`: The specific endpoint (optional, defaults to `/v1/chat/completions`).
 
 When configured this way, the client receives a placeholder key (`SERVER_MANAGED`), and the actual key is injected by the middleware.
 

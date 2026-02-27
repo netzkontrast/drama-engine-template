@@ -31,7 +31,7 @@ export default function Home() {
   const initialApiKey = hasServerKey ? "SERVER_MANAGED" : (clientApiKey || "");
 
   const initialBaseUrl = serverBaseUrl || clientBaseUrl || "https://openrouter.ai/api";
-  const initialEndpoint = serverEndpoint || clientEndpoint || "/v1/completions";
+  const initialEndpoint = serverEndpoint || clientEndpoint || "/v1/chat/completions";
   const initialModelName = clientModelName || "stepfun/step-3.5-flash:free";
 
   return (
