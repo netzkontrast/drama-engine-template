@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { AllChatsContainer } from './components/AllChatsContainer';
 import { DramaProvider } from './contexts/drama-context';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
@@ -10,11 +10,19 @@ import Link from 'next/link';
 
 export default function Home() {
 
-  const [baseUrl, setBaseUrl] = useState("https://openrouter.ai/api");
-  const [endpoint, setEndpoint] = useState("/v1/completions");
-  const [apiKey, setApiKey] = useState("");
-  const [modelName, setModelName] = useState("stepfun/step-3.5-flash:free");
-  const [ready, setReady] = useState(false);
+  const envBaseUrl = process.env.NEXT_PUBLIC_DE_BASE_URL || "https://openrouter.ai/api";
+  const envEndpoint = process.env.NEXT_PUBLIC_DE_ENDPOINT_URL || "/v1/completions";
+  const envApiKey = process.env.NEXT_PUBLIC_DE_BACKEND_API_KEY || "";
+  const envModelName = process.env.NEXT_PUBLIC_DE_MODEL_NAME || "stepfun/step-3.5-flash:free";
+
+  const [baseUrl, setBaseUrl] = useState(envBaseUrl);
+  const [endpoint, setEndpoint] = useState(envEndpoint);
+  const [apiKey, setApiKey] = useState(envApiKey);
+  const [modelName, setModelName] = useState(envModelName);
+
+  // If apiKey is provided via environment, we are ready to go.
+  // We check for length > 0 just to be sure it's not an empty string if that was passed.
+  const [ready, setReady] = useState(envApiKey.length > 0);
 
   const validConfiguration = () => apiKey.length > 0;
 
