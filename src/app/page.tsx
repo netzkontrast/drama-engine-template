@@ -10,10 +10,10 @@ import Link from 'next/link';
 
 export default function Home() {
 
-  const [baseUrl, setBaseUrl] = useState("https://api.novita.ai/v3/openai");
+  const [baseUrl, setBaseUrl] = useState("https://openrouter.ai/api");
   const [endpoint, setEndpoint] = useState("/v1/completions");
   const [apiKey, setApiKey] = useState("");
-  const [modelName, setModelName] = useState("teknium/openhermes-2.5-mistral-7b");
+  const [modelName, setModelName] = useState("stepfun/step-3.5-flash:free");
   const [ready, setReady] = useState(false);
 
   const validConfiguration = () => apiKey.length > 0;
